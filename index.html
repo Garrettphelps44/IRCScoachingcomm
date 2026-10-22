@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IRCS Coach Communication Log</title>
+<style>
+  :root{--crimson:#6A0A13;--navy:#001230;--lgray:#D1D3D4;--gray:#A7A9AC;--line:#2b3957}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--lgray);color:var(--navy);font-family:"Bookman Old Style",Bookman,"URW Bookman",Georgia,serif;padding:16px}
+  .wrap{max-width:900px;margin:0 auto}
+  .top{border-bottom:4px solid var(--crimson);padding-bottom:10px;margin-bottom:16px}
+  h1{font-size:24px;margin:0 0 4px;color:var(--navy)}
+  h1 span{color:var(--crimson)}
+  .sub{color:var(--navy);opacity:.7;font-size:13px}
+  .card{background:var(--navy);color:#fff;border-radius:10px;padding:14px;margin-bottom:16px;border-top:4px solid var(--crimson)}
+  label{display:block;font-size:12px;color:var(--gray);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.8px}
+  label:first-child{margin-top:0}
+  input,select{width:100%;background:#fff;color:var(--navy);border:2px solid var(--gray);border-radius:8px;padding:11px;font-size:16px;font-family:inherit}
+  input:focus,select:focus{outline:none;border-color:var(--crimson)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row>div{flex:1 1 140px;min-width:0}
+  input,select{min-width:0;max-width:100%;display:block;-webkit-appearance:none;appearance:none;height:46px;line-height:1.2}
+  input[type="date"],input[type="time"]{min-height:46px;text-align:left}
+  input::-webkit-date-and-time-value{text-align:left;min-height:1.2em}
+  select{background-image:linear-gradient(45deg,transparent 50%,#001230 50%),linear-gradient(135deg,#001230 50%,transparent 50%);background-position:calc(100% - 20px) 20px,calc(100% - 14px) 20px;background-size:6px 6px,6px 6px;background-repeat:no-repeat;padding-right:36px}
+  @media(max-width:480px){
+    body{padding:12px}
+    .row{flex-direction:column;gap:0}
+    .row>div{flex:none;width:100%}
+    .btns button{width:100%}
+  }
+  button{background:var(--crimson);color:#fff;border:2px solid var(--crimson);border-radius:8px;padding:12px 16px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+  button:hover{filter:brightness(1.15)}
+  button.ghost{background:transparent;color:var(--lgray);border:2px solid var(--gray)}
+  button.small{padding:6px 10px;font-size:12px}
+  .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .btns button.main{flex:1}
+  h2{font-size:15px;margin:0 0 10px;color:#fff;text-transform:uppercase;letter-spacing:1px}
+  .logline{display:grid;grid-template-columns:90px 80px 130px 110px 1fr 40px;gap:8px;align-items:center;padding:9px 4px;border-bottom:1px solid var(--line);font-size:14px}
+  .logline.head{color:var(--gray);font-size:11px;text-transform:uppercase;letter-spacing:.8px}
+  .logline .x{background:none;color:var(--gray);border:0;font-size:16px;padding:0;cursor:pointer}
+  .logline .x:hover{color:#fff}
+  .type{color:var(--gray);font-style:italic}
+  .empty{color:var(--gray);padding:14px 4px;font-size:14px}
+  .count{color:var(--gray);font-size:12px;margin-left:6px;text-transform:none;letter-spacing:0}
+  .msg{color:var(--gray);font-size:13px;margin:10px 0 0}
+  @media(max-width:640px){
+    .logline{grid-template-columns:1fr 1fr;gap:2px 8px}
+    .logline.head{display:none}
+    .logline .topic{grid-column:1/3;color:var(--lgray)}
+    .logline .x{justify-self:end}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>IRCS <span>Coach Communication</span> Log</h1>
+    <div class="sub">Athletic Performance · Log it. Filter it. Export it.</div>
+  </div>
+
+  <div class="card">
+    <label for="coach">Coach communicated with</label>
+    <input id="coach" type="text" placeholder="Coach name" autocomplete="off">
+
+    <label for="type">Type of interaction</label>
+    <select id="type">
+      <option>Text</option>
+      <option>Email</option>
+      <option>Face to face</option>
+      <option>Other</option>
+    </select>
+
+    <label for="topic">Topic discussed</label>
+    <input id="topic" type="text" placeholder="What did you talk about?" autocomplete="off">
+
+    <div class="row">
+      <div><label for="date">Date</label><input id="date" type="date"></div>
+      <div><label for="time">Time</label><input id="time" type="time"></div>
+    </div>
+
+    <div class="btns"><button class="main" id="add">Add to Log</button></div>
+  </div>
+
+  <div class="card">
+    <h2>Date Range</h2>
+    <div class="row">
+      <div><label for="start">Start</label><input id="start" type="date"></div>
+      <div><label for="end">Finish</label><input id="end" type="date"></div>
+    </div>
+    <div class="btns">
+      <button class="ghost small" id="clear">Clear (show all)</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Log <span class="count" id="count"></span></h2>
+    <div class="logline head"><div>Date</div><div>Time</div><div>Coach</div><div>Type</div><div>Topic</div><div></div></div>
+    <div id="log"></div>
+    <div class="btns">
+      <button class="main" id="exportImg">Export Image (PNG)</button>
+      <button class="ghost" id="copyImg">Copy Image</button>
+    </div>
+    <div class="msg" id="msg"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY="coachCommLog_v1";
+  var entries=[];
+  try{entries=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){entries=[]}
+
+  // Backlog: loads once per browser, then your own edits/deletes stick
+  var SEED=[
+    {id:"seed1",date:"2026-10-06",time:"14:00",coach:"Brice (Soccer)",type:"Text",topic:"Friday lifts: no as of now for both MS and HS due to no interest"},
+    {id:"seed2",date:"2026-10-06",time:"14:00",coach:"Nik (Wrestling)",type:"Text",topic:"Time slots don't work; will think about a split-practice day with lifting first, then skill work"},
+    {id:"seed3",date:"2026-10-06",time:"15:50",coach:"Coach Des",type:"Face to face",topic:"Lifting on Fridays at 3:15; Wednesdays coming in after field work"},
+    {id:"seed4",date:"2026-10-08",time:"",coach:"Coach Nate",type:"Text",topic:"MS basketball and lifts throughout the season"},
+    {id:"seed5",date:"2026-10-08",time:"",coach:"Coach Cooper",type:"Face to face",topic:"MS track lifts on Wednesdays for the spring"},
+    {id:"seed6",date:"2026-10-08",time:"",coach:"Coach Harris",type:"Other",topic:"Girls continue with flag all winter"},
+    {id:"seed7",date:"2026-10-22",time:"12:15",coach:"Coach Harris",type:"Other",topic:"Move girls from 4:30 to 3:15 moving forward"},
+    {id:"seed8",date:"2026-10-22",time:"",coach:"Coach Nate",type:"Text",topic:"Moving Wednesday lifts to a different day"}
+  ];
+  var seededFlag=null;
+  try{seededFlag=localStorage.getItem(KEY+"_seeded")}catch(e){}
+  if(!seededFlag){
+    var have={};entries.forEach(function(x){have[x.id]=1});
+    SEED.forEach(function(s){if(!have[s.id])entries.push(s)});
+    try{localStorage.setItem(KEY,JSON.stringify(entries));localStorage.setItem(KEY+"_seeded","1")}catch(e){}
+  }
+  var $=function(id){return document.getElementById(id)};
+  var FONT='"Bookman Old Style", Bookman, "URW Bookman", Georgia, serif';
+
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(entries))}catch(e){}}
+  function pad(n){return String(n).padStart(2,"0")}
+  function nowDefaults(){
+    var d=new Date();
+    $("date").value=d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+    $("time").value=pad(d.getHours())+":"+pad(d.getMinutes());
+  }
+  function fmtDate(s){var p=s.split("-");return p[1]+"/"+p[2]+"/"+p[0].slice(2)}
+  function fmtTime(t){
+    if(!t)return"";var p=t.split(":"),h=+p[0],ap=h>=12?"PM":"AM";h=h%12||12;return h+":"+p[1]+" "+ap;
+  }
+  function filtered(){
+    var s=$("start").value,e=$("end").value;
+    return entries.filter(function(x){
+      if(s&&x.date<s)return false;
+      if(e&&x.date>e)return false;
+      return true;
+    }).sort(function(a,b){return (a.date+a.time)<(b.date+b.time)?1:-1});
+  }
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+
+  function render(){
+    var list=filtered(),box=$("log");
+    $("count").textContent="("+list.length+")";
+    if(!list.length){box.innerHTML='<div class="empty">No entries yet.</div>';return}
+    box.innerHTML=list.map(function(x){
+      return '<div class="logline"><div>'+fmtDate(x.date)+'</div><div>'+fmtTime(x.time)+'</div><div>'+esc(x.coach)+
+        '</div><div class="type">'+esc(x.type)+'</div><div class="topic">'+esc(x.topic)+
+        '</div><button class="x" title="Delete" data-id="'+x.id+'">✕</button></div>';
+    }).join("");
+  }
+
+  $("add").onclick=function(){
+    var coach=$("coach").value.trim(),topic=$("topic").value.trim();
+    if(!coach||!topic){$("msg").textContent="Coach and topic are required.";return}
+    entries.push({id:Date.now()+""+Math.floor(Math.random()*1000),coach:coach,type:$("type").value,topic:topic,date:$("date").value,time:$("time").value});
+    save();
+    $("coach").value="";$("topic").value="";$("msg").textContent="";
+    nowDefaults();render();$("coach").focus();
+  };
+  $("log").onclick=function(e){
+    var id=e.target.getAttribute&&e.target.getAttribute("data-id");
+    if(!id)return;
+    if(confirm("Delete this entry?")){entries=entries.filter(function(x){return x.id!==id});save();render()}
+  };
+  $("start").onchange=render;$("end").onchange=render;
+  $("clear").onclick=function(){$("start").value="";$("end").value="";render()};
+  $("topic").addEventListener("keydown",function(e){if(e.key==="Enter")$("add").click()});
+
+  function rangeLabel(){
+    var s=$("start").value,e=$("end").value;
+    if(!s&&!e)return"All entries";
+    if(s&&e)return fmtDate(s)+" – "+fmtDate(e);
+    return s?"From "+fmtDate(s):"Through "+fmtDate(e);
+  }
+
+  // Email-ready image: navy header, crimson rule, white body, navy text
+  function buildCanvas(){
+    var list=filtered().slice().reverse();
+    var W=1200,pad=40,rowPad=14;
+    var font="21px "+FONT;
+    var cols={date:pad,time:pad+120,coach:pad+250,type:pad+430,topic:pad+580};
+    var topicW=W-pad-cols.topic;
+    var m=document.createElement("canvas").getContext("2d");
+    m.font=font;
+    function wrap(text){
+      var words=text.split(/\s+/),lines=[],cur="";
+      words.forEach(function(w){
+        var t=cur?cur+" "+w:w;
+        if(m.measureText(t).width>topicW&&cur){lines.push(cur);cur=w}else cur=t;
+      });
+      if(cur)lines.push(cur);return lines;
+    }
+    var lineH=30;
+    var rows=list.map(function(x){var l=wrap(x.topic);return{x:x,lines:l,h:l.length*lineH+rowPad*2}});
+    var total=62+rows.reduce(function(a,r){return a+r.h},0);
+    if(!rows.length)total=130;
+    var c=document.createElement("canvas");c.width=W;c.height=total;
+    var g=c.getContext("2d");
+    g.fillStyle="#fff";g.fillRect(0,0,W,total);
+    var y=40;
+    g.font="bold 15px "+FONT;g.fillStyle="#6A0A13";
+    var keys=["date","time","coach","type","topic"],heads=["DATE","TIME","COACH","TYPE","TOPIC"];
+    heads.forEach(function(h,i){g.fillText(h,cols[keys[i]],y)});
+    y+=10;g.fillStyle="#001230";g.fillRect(pad,y,W-pad*2,2);
+    if(!rows.length){g.fillStyle="#A7A9AC";g.font=font;g.fillText("No entries in this range.",pad,y+50)}
+    rows.forEach(function(r,i){
+      if(i%2===0){g.fillStyle="#F1F2F2";g.fillRect(pad,y+2,W-pad*2,r.h)}
+      g.font=font;var ty=y+2+rowPad+20;
+      g.fillStyle="#001230";g.fillText(fmtDate(r.x.date),cols.date,ty);
+      g.fillText(fmtTime(r.x.time),cols.time,ty);
+      var coach=r.x.coach,trimmed=false;
+      while(g.measureText(coach).width>170&&coach.length>1){coach=coach.slice(0,-1);trimmed=true}
+      if(trimmed)coach=coach.slice(0,-1)+"…";
+      g.fillText(coach,cols.coach,ty);
+      g.fillStyle="#6A0A13";g.fillText(r.x.type,cols.type,ty);
+      g.fillStyle="#001230";
+      r.lines.forEach(function(l,k){g.fillText(l,cols.topic,ty+k*lineH)});
+      y+=r.h;
+    });
+    return c;
+  }
+
+  $("exportImg").onclick=function(){
+    var c=buildCanvas();
+    c.toBlob(function(b){
+      var a=document.createElement("a");a.href=URL.createObjectURL(b);
+      a.download="ircs-coach-log-"+($("start").value||"all")+(($("end").value)?"_to_"+$("end").value:"")+".png";
+      document.body.appendChild(a);a.click();a.remove();
+      $("msg").textContent="Image downloaded.";
+    },"image/png");
+  };
+  $("copyImg").onclick=function(){
+    var c=buildCanvas();
+    c.toBlob(function(b){
+      try{
+        navigator.clipboard.write([new ClipboardItem({"image/png":b})]).then(function(){
+          $("msg").textContent="Image copied. Paste it straight into your email.";
+        },function(){$("msg").textContent="Copy blocked here. Use Export Image instead."});
+      }catch(e){$("msg").textContent="Copy not supported here. Use Export Image instead."}
+    },"image/png");
+  };
+
+  nowDefaults();render();
+})();
+</script>
+</body>
+</html>
